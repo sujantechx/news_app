@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/Ui%20Screen/explore.dart';
-import 'package:news_app/Ui%20Screen/home.dart';
 import 'package:news_app/Ui%20Screen/profile.dart';
 import 'package:news_app/Ui%20Screen/save.dart';
+
+import '../Ui Screen/home/homepage.dart';
 
 class DashBord extends StatefulWidget {
   const DashBord({super.key});

@@ -1,28 +1,55 @@
+import 'package:equatable/equatable.dart';
 import '../../../model/news_model.dart';
 
-/// Base state for NewsCubit
-abstract class NewsState {}
+/// Enum to track the status of each independent data fetch.
+enum DataStatus { initial, loading, success, failure }
 
-/// 🔹 Initial State
-class NewsInitial extends NewsState {}
+class HomeState extends Equatable {
+  // Properties for Top Headlines / Main List
+  final DataStatus topHeadlinesStatus;
+  final List<Article> topHeadlinesArticles;
+  final String topHeadlinesError;
 
-/// 🔹 Loading State
-class NewsLoading extends NewsState {}
+  // Properties for Trending News
+  final DataStatus trendingNewsStatus;
+  final List<Article> trendingNewsArticles;
+  final String trendingNewsError;
 
-/// 🔹 Loaded State for general news & search results
-class NewsLoaded extends NewsState {
-  final List<NewsModel> news;
-  NewsLoaded({required this.news});
-}
+  const HomeState({
+    this.topHeadlinesStatus = DataStatus.initial,
+    this.topHeadlinesArticles = const [],
+    this.topHeadlinesError = '',
+    this.trendingNewsStatus = DataStatus.initial,
+    this.trendingNewsArticles = const [],
+    this.trendingNewsError = '',
+  });
 
-/// 🔹 Loaded State for trending news
-class TrendingNewsLoaded extends NewsState {
-  final List<NewsModel> trendingNews;
-  TrendingNewsLoaded({required this.trendingNews});
-}
+  /// Creates a copy of the state with updated values. This is crucial for immutable state management.
+  HomeState copyWith({
+    DataStatus? topHeadlinesStatus,
+    List<Article>? topHeadlinesArticles,
+    String? topHeadlinesError,
+    DataStatus? trendingNewsStatus,
+    List<Article>? trendingNewsArticles,
+    String? trendingNewsError,
+  }) {
+    return HomeState(
+      topHeadlinesStatus: topHeadlinesStatus ?? this.topHeadlinesStatus,
+      topHeadlinesArticles: topHeadlinesArticles ?? this.topHeadlinesArticles,
+      topHeadlinesError: topHeadlinesError ?? this.topHeadlinesError,
+      trendingNewsStatus: trendingNewsStatus ?? this.trendingNewsStatus,
+      trendingNewsArticles: trendingNewsArticles ?? this.trendingNewsArticles,
+      trendingNewsError: trendingNewsError ?? this.trendingNewsError,
+    );
+  }
 
-/// 🔹 Error State
-class NewsError extends NewsState {
-  final String message;
-  NewsError({required this.message});
+  @override
+  List<Object> get props => [
+    topHeadlinesStatus,
+    topHeadlinesArticles,
+    topHeadlinesError,
+    trendingNewsStatus,
+    trendingNewsArticles,
+    trendingNewsError,
+  ];
 }

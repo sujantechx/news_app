@@ -1,30 +1,29 @@
-class ApiExceptions implements Exception {
-  final String title;
-  final String msg;
+// lib/data/remote/api_exceptions.dart
 
-  ApiExceptions({required this.title, required this.msg});
+class ApiException implements Exception {
+  final String _prefix;
+  final String _message;
 
-  String toErrorMsg() {
-    return "$title: $msg";
+  ApiException(this._prefix, this._message);
+
+  @override
+  String toString() {
+    return "$_prefix: $_message";
   }
 }
 
-class FetchDataException extends ApiExceptions {
-  FetchDataException({required String errorMsg})
-      : super(title: "Network Error", msg: errorMsg);
+class FetchDataException extends ApiException {
+  FetchDataException(String message) : super("Network Error", message);
 }
 
-class BadRequestException extends ApiExceptions {
-  BadRequestException({required String errorMsg})
-      : super(title: "Invalid Request", msg: errorMsg);
+class BadRequestException extends ApiException {
+  BadRequestException(String message) : super("Invalid Request", message);
 }
 
-class UnauthorisedException extends ApiExceptions {
-  UnauthorisedException({required String errorMsg})
-      : super(title: "Unauthorised", msg: errorMsg);
+class UnauthorisedException extends ApiException {
+  UnauthorisedException(String message) : super("Unauthorised", message);
 }
 
-class InvalidInputException extends ApiExceptions {
-  InvalidInputException({required String errorMsg})
-      : super(title: "Invalid Input", msg: errorMsg);
+class ApiNotRespondingException extends ApiException {
+  ApiNotRespondingException(String message) : super("API Not Responding", message);
 }

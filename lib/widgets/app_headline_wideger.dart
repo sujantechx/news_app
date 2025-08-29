@@ -1,53 +1,57 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// lib/presentation/home/cubit/home_state.dart
 
-import '../util/helpper/text_style.dart';
+import 'package:equatable/equatable.dart';
+import '../../../model/news_model.dart';
 
-class AppHeadlineWideger extends StatelessWidget {
-  String imgUrl;
-  String headLine;
-  String author;
-   AppHeadlineWideger({
-     required this.imgUrl,
-     required this.headLine ,
-     required this.author});
+// Enum to track the status of each data fetch
+enum DataStatus { initial, loading, success, failure }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 300,height: 400,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(34)
-      ),
-      child: Column(
-        children: [
-          Expanded(child: ClipRRect(
-      borderRadius: BorderRadius.circular(34),
-              child: Image.network(imgUrl,fit: BoxFit.fill,))),
+class HomeState extends Equatable {
+  // State for Top Headlines / Main List
+  final DataStatus topHeadlinesStatus;
+  final List<Article> topHeadlinesArticles;
+  final String topHeadlinesError;
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Treading NO.1",
-                  style: mTextStyle16(textColor: Colors.grey)),
-              Text("2 day ago", style: mTextStyle16(textColor: Colors.grey)),
-            ],
-          ),
-          Text(headLine,
-              style: mTextStyle20(mFontWeight: FontWeight.bold)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CircleAvatar(radius: 20,backgroundColor: Colors.blueAccent,),
-              SizedBox(width: 10,),
-              Text(author,
-                  style: mTextStyle18(textColor: Colors.grey)),
-              Expanded(child: Container()),
-              Icon(Icons.more_horiz)
-            ],
-          ),
-        ],
-      ),
+  // State for Trending News
+  final DataStatus trendingNewsStatus;
+  final List<Article> trendingNewsArticles;
+  final String trendingNewsError;
+
+  const HomeState({
+    this.topHeadlinesStatus = DataStatus.initial,
+    this.topHeadlinesArticles = const [],
+    this.topHeadlinesError = '',
+    this.trendingNewsStatus = DataStatus.initial,
+    this.trendingNewsArticles = const [],
+    this.trendingNewsError = '',
+  });
+
+  // copyWith method to easily create a new state object with updated values
+  HomeState copyWith({
+    DataStatus? topHeadlinesStatus,
+    List<Article>? topHeadlinesArticles,
+    String? topHeadlinesError,
+    DataStatus? trendingNewsStatus,
+    List<Article>? trendingNewsArticles,
+    String? trendingNewsError,
+  }) {
+    return HomeState(
+      topHeadlinesStatus: topHeadlinesStatus ?? this.topHeadlinesStatus,
+      topHeadlinesArticles: topHeadlinesArticles ?? this.topHeadlinesArticles,
+      topHeadlinesError: topHeadlinesError ?? this.topHeadlinesError,
+      trendingNewsStatus: trendingNewsStatus ?? this.trendingNewsStatus,
+      trendingNewsArticles: trendingNewsArticles ?? this.trendingNewsArticles,
+      trendingNewsError: trendingNewsError ?? this.trendingNewsError,
     );
   }
+
+  @override
+  List<Object> get props => [
+    topHeadlinesStatus,
+    topHeadlinesArticles,
+    topHeadlinesError,
+    trendingNewsStatus,
+    trendingNewsArticles,
+    trendingNewsError,
+  ];
 }

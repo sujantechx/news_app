@@ -1,43 +1,58 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/repository/news_reposetry.dart';
-import '../../../model/news_model.dart';
 import 'home_state.dart';
 
-class NewsCubit extends Cubit<NewsState> {
-  final NewsRepository newsRepository;
+class HomeCubit extends Cubit<HomeState> {
+  final BaseNewsRepository _newsRepository;
 
-  NewsCubit({required this.newsRepository}) : super(NewsInitial());
+  HomeCubit({required BaseNewsRepository newsRepository})
+      : _newsRepository = newsRepository,
+        super(const HomeState());
 
-  /// ✅ Fetch trending news
-  Future<void> fetchTrendingNews() async {
-    emit(NewsLoading());
+  /// Fetches all initial data for the home screen concurrently for better performance.
+  Future<void> loadInitialData() async {
+    emit(state.copyWith(
+      topHeadlinesStatus: DataStatus.loading,
+      trendingNewsStatus: DataStatus.loading,
+    ));
     try {
-      final NewsModel trendingNews = await newsRepository.fetchTrendingNews();
-      emit(TrendingNewsLoaded(trendingNews: [trendingNews]));
+      // Fetch both APIs at the same time.
+      final responses = await Future.wait([
+        _newsRepository.getTopHeadlines(country: 'us'),
+        _newsRepository.getTrendingNews(),
+      ]);
+      // Emit a single success state with all the data.
+      emit(state.copyWith(
+        topHeadlinesStatus: DataStatus.success,
+        topHeadlinesArticles: responses[0].articles,
+        trendingNewsStatus: DataStatus.success,
+        trendingNewsArticles: responses[1].articles,
+      ));
     } catch (e) {
-      emit(NewsError(message: e.toString()));
+      emit(state.copyWith(
+        topHeadlinesStatus: DataStatus.failure,
+        topHeadlinesError: e.toString(),
+        trendingNewsStatus: DataStatus.failure,
+        trendingNewsError: e.toString(),
+      ));
     }
   }
 
-  /// ✅ Search for news articles
+  /// Search will update the main list of articles.
   Future<void> searchNews(String query) async {
-    emit(NewsLoading());
+    if (query.trim().isEmpty) return;
+    emit(state.copyWith(topHeadlinesStatus: DataStatus.loading));
     try {
-      final NewsModel news = await newsRepository.searchNews(query);
-      emit(NewsLoaded(news: [news]));
+      final news = await _newsRepository.searchNews(query: query);
+      emit(state.copyWith(
+        topHeadlinesStatus: DataStatus.success,
+        topHeadlinesArticles: news.articles,
+      ));
     } catch (e) {
-      emit(NewsError(message: e.toString()));
-    }
-  }
-
-  /// ✅ Fetch top headlines
-  Future<void> fetchTopHeadlines({String country = "in"}) async {
-    emit(NewsLoading());
-    try {
-      final NewsModel news = await newsRepository.getTopHeadlines(country: country);
-      emit(NewsLoaded(news: [news]));
-    } catch (e) {
-      emit(NewsError(message: e.toString()));
+      emit(state.copyWith(
+        topHeadlinesStatus: DataStatus.failure,
+        topHeadlinesError: e.toString(),
+      ));
     }
   }
 }

@@ -21,8 +21,8 @@ class AppRoutes {
 static Map<String,Widget Function(BuildContext)>routs={
   splash:(_)=>Splash(),
   intro:(_)=>Intro(),
-  home:(_)=>Home(),
-  explore:(_)=>Explore(),
+  home:(_)=>HomeView(),
+  explore:(_)=>ExploreView(),
   saved:(_)=>Saved(),
   profile:(_)=>Profile(),
   dashbord:(_)=>DashBord()

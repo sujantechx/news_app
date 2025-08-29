@@ -1,40 +1,50 @@
+// lib/data/repository/news_repository.dart
+
 import '../../model/news_model.dart';
 import '../remote/api_helper.dart';
 import '../remote/urls.dart';
 
-class NewsRepository {
-  final ApiHelper apiHelper;
+// INTERFACE
+abstract class BaseNewsRepository {
+  Future<NewsModel> getTopHeadlines({required String country, String? category});
+  Future<NewsModel> searchNews({required String query});
+  Future<NewsModel> getTrendingNews({String sources = "bbc-news,the-verge"});
+}
 
-  NewsRepository({required this.apiHelper});
+// IMPLEMENTATION
+class NewsRepositoryImpl implements BaseNewsRepository {
+  final BaseApiClient _apiClient;
 
-  /// Fetch Top Headlines (Country-based)
-  Future<NewsModel> getTopHeadlines({String country = "us"}) async {
-    final data = await apiHelper.getAPI(
-      url: AppUrls.HEADLINES_URL,
-      params: {'country': country},
-    );
-    return NewsModel.fromJson(data);
+  NewsRepositoryImpl({required BaseApiClient apiClient}) : _apiClient = apiClient;
+
+  Future<NewsModel> _fetchNews(String url, Map<String, String> params) async {
+    try {
+      final response = await _apiClient.get(url: url, params: params);
+      return NewsModel.fromJson(response);
+    } catch (e) {
+      rethrow;
+    }
   }
 
-
-  /// Search News Articles
-  Future<NewsModel> searchNews(String query) async {
-    final data = await apiHelper.getAPI(
-      url: AppUrls.EVERYTHING_URL,
-      params: {'q': query},
-    );
-    return NewsModel.fromJson(data);
+  @override
+  Future<NewsModel> getTopHeadlines({required String country, String? category}) {
+    final params = {'country': country};
+    if (category != null) {
+      params['category'] = category;
+    }
+    return _fetchNews(ApiConstants.TOP_HEADLINES_URL, params);
   }
 
-  Future<NewsModel> fetchTrendingNews({String language = "en"}) async {
-    final data = await apiHelper.getAPI(
-      url: AppUrls.TRENDING_NEWS_URL,
-      params: {
-        'language': language,
-        'sortBy': 'popularity', //  Works here
-        'q': 'latest',          //  Ensures trending/latest news
-      },
-    );
-    return NewsModel.fromJson(data);
+  @override
+  Future<NewsModel> searchNews({required String query}) {
+    return _fetchNews(ApiConstants.EVERYTHING_URL, {'q': query});
+  }
+
+  @override
+  Future<NewsModel> getTrendingNews({String sources = "bbc-news,the-verge"}) {
+    return _fetchNews(ApiConstants.EVERYTHING_URL, {
+      'sources': sources,
+      'sortBy': 'popularity',
+    });
   }
 }
